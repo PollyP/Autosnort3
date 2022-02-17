@@ -174,8 +174,13 @@ install_packages ${packages[@]}
 #this section involves a lot of html and json parsing from a couple of different websites in order to find the latest version of each software package
 #if the github api, the download pages, or the urls change, this script will likely break horribly. but that's a problem for future me.
 
-safec_latest_url=`curl --silent "https://api.github.com/repos/rurban/safeclib/releases/latest" | jq -r '.assets[0].browser_download_url'`
-safec_ver=`echo $safec_latest_url | cut -d"/" -f9 | cut -d"." -f1`
+# make this script work with safeclib 3.7.1
+#safec_latest_url=`curl --silent "https://api.github.com/repos/rurban/safeclib/releases/latest" | jq -r '.assets[0].browser_download_url'`
+# get the bz2 download url, for the first item in the json object (which is just a sha256 file)
+safec_latest_url=`curl --silent "https://api.github.com/repos/rurban/safeclib/releases/latest" | jq -r '.assets[].browser_download_url' | grep .bz2`
+#safec_ver=`echo $safec_latest_url | cut -d"/" -f9 | cut -d"." -f1`
+# get the full 3.7.1 version. might break if the next release doesn't have 3 point fields!
+safec_ver=`echo $safec_latest_url | cut -d"/" -f9 | cut -d"." -f1,2,3`
 
 gperftools_latest_url=`curl --silent "https://api.github.com/repos/gperftools/gperftools/releases/latest" | jq -r '.assets[0].browser_download_url'`
 gperftools_ver=`echo $gperftools_latest_url | cut -d"/" -f9 | sed 's/.tar.gz//'`
